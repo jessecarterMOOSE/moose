@@ -205,6 +205,7 @@
 #include "GetTransferUserObject.h"
 #include "TestCSVReader.h"
 #include "ToggleMeshAdaptivity.h"
+#include "GetPPSValue.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -561,6 +562,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerPostprocessor(NumAdaptivityCycles);
   registerPostprocessor(TestDiscontinuousValuePP);
   registerPostprocessor(RandomPostprocessor);
+  registerPostprocessor(GetPPSValue);
 
   registerVectorPostprocessor(LateDeclarationVectorPostprocessor);
   registerVectorPostprocessor(ChannelGradientVectorPostprocessor);
