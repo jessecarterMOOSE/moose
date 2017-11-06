@@ -2707,7 +2707,7 @@ FEProblemBase::computeIndicators()
   // Initialize indicator aux variable fields
   if (_indicators.hasActiveObjects() || _internal_side_indicators.hasActiveObjects())
   {
-    Moose::perf_log.push("Adaptivity: computeIndicators()", "Execution");
+    Moose::perf_log.push("computeIndicators()", "Mesh Adaptivity");
 
     std::vector<std::string> fields;
 
@@ -2734,7 +2734,7 @@ FEProblemBase::computeIndicators()
     _aux->solution().close();
     _aux->update();
 
-    Moose::perf_log.pop("Adaptivity: computeIndicators()", "Execution");
+    Moose::perf_log.pop("computeIndicators()", "Mesh Adaptivity");
   }
 }
 
@@ -2743,7 +2743,7 @@ FEProblemBase::computeMarkers()
 {
   if (_markers.hasActiveObjects())
   {
-    Moose::perf_log.push("Adaptivity: computeMarkers()", "Execution");
+    Moose::perf_log.push("FEProblemBase::computeMarkers()", "Mesh Adaptivity");
 
     std::vector<std::string> fields;
 
@@ -2769,7 +2769,7 @@ FEProblemBase::computeMarkers()
     _aux->solution().close();
     _aux->update();
 
-    Moose::perf_log.pop("Adaptivity: computeMarkers()", "Execution");
+    Moose::perf_log.pop("FEProblemBase::computeMarkers()", "Mesh Adaptivity");
   }
 }
 
@@ -4472,7 +4472,7 @@ FEProblemBase::adaptMesh()
 
   unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
 
-  Moose::perf_log.push("Adaptivity: adaptMesh()", "Execution");
+  Moose::perf_log.push("FEProblemBase::adaptMesh()", "Mesh Adaptivity");
 
   for (unsigned int i = 0; i < cycles_per_step; ++i)
   {
@@ -4495,7 +4495,7 @@ FEProblemBase::adaptMesh()
     _console << std::flush;
   }
 
-  Moose::perf_log.pop("Adaptivity: adaptMesh()", "Execution");
+  Moose::perf_log.pop("FEProblemBase::adaptMesh()", "Mesh Adaptivity");
 }
 #endif // LIBMESH_ENABLE_AMR
 
@@ -4538,6 +4538,8 @@ FEProblemBase::updateMeshXFEM()
 void
 FEProblemBase::meshChanged()
 {
+  Moose::perf_log.push("FEProblemBase::meshChanged()", "Mesh Adaptivity");
+
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
     _mesh.cacheChangedLists(); // Currently only used with adaptivity and stateful material
                                // properties
@@ -4551,7 +4553,9 @@ FEProblemBase::meshChanged()
   // callbacks (e.g. for sparsity calculations) triggered by the
   // EquationSystems reinit may require up-to-date MooseMesh caches.
   _mesh.meshChanged();
+  Moose::perf_log.push("_eq.reinit()", "Mesh Adaptivity");
   _eq.reinit();
+  Moose::perf_log.pop("_eq.reinit()", "Mesh Adaptivity");
 
   // But that breaks other adaptivity code, unless we then *again*
   // update the MooseMesh caches.  E.g. the definition of "active" and
@@ -4616,6 +4620,8 @@ FEProblemBase::meshChanged()
 
   for (const auto & mci : _notify_when_mesh_changes)
     mci->meshChanged();
+
+  Moose::perf_log.pop("FEProblemBase::meshChanged()", "Mesh Adaptivity");
 }
 
 void
