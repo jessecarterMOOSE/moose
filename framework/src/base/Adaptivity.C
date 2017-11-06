@@ -124,6 +124,8 @@ Adaptivity::setErrorNorm(SystemNorm & sys_norm)
 bool
 Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
 {
+  Moose::perf_log.push("Adaptivity::adaptMesh()", "Mesh Adaptivity");
+
   // If the marker name is supplied, use it. Otherwise, use the one in _marker_variable_name
   if (marker_name.empty())
     marker_name = _marker_variable_name;
@@ -172,7 +174,9 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
     _displaced_problem->undisplaceMesh();
 
   // Perform refinement and coarsening
+  Moose::perf_log.push("refine_and_coarsen_elements()", "Mesh Adaptivity");
   mesh_changed = _mesh_refinement->refine_and_coarsen_elements();
+  Moose::perf_log.pop("refine_and_coarsen_elements()", "Mesh Adaptivity");
 
   if (_displaced_problem && mesh_changed)
   {
@@ -191,6 +195,8 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
     _console << "\nMesh Changed:\n";
     _mesh.printInfo();
   }
+
+  Moose::perf_log.pop("Adaptivity::adaptMesh()", "Mesh Adaptivity");
 
   return mesh_changed;
 }
