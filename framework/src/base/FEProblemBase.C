@@ -4546,9 +4546,14 @@ FEProblemBase::meshChanged()
   // callbacks (e.g. for sparsity calculations) triggered by the
   // EquationSystems reinit may require up-to-date MooseMesh caches.
   _mesh.meshChanged();
-  Moose::perf_log.push("_eq.reinit()", "Mesh Adaptivity");
-  _eq.reinit();
-  Moose::perf_log.pop("_eq.reinit()", "Mesh Adaptivity");
+
+  Moose::perf_log.push("_eq.reinit_solutions()", "Mesh Adaptivity");
+  _eq.reinit_solutions();
+  Moose::perf_log.pop("_eq.reinit_solutions()", "Mesh Adaptivity");
+
+  Moose::perf_log.push("_eq.reinit_systems()", "Mesh Adaptivity");
+  _eq.reinit_systems();
+  Moose::perf_log.pop("_eq.reinit_systems()", "Mesh Adaptivity");
 
   // But that breaks other adaptivity code, unless we then *again*
   // update the MooseMesh caches.  E.g. the definition of "active" and
