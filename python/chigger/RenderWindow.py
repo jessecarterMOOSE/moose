@@ -326,6 +326,36 @@ class RenderWindow(base.ChiggerObject):
         writer.SetInputData(window_filter.GetOutput())
         writer.Write()
 
+    def getImageData(self, **kwargs):
+        """
+        Returns PNG image data of the VTKWindow.
+
+        Useful for rendering in a Jupyter notebook without the need to write to file.
+
+        Example usage:
+
+        window = chigger.RenderWindow(...)
+        from IPython.display import Image
+        Image(window.getImageData())
+        """
+        if self.needsUpdate() or kwargs:
+            self.update(**kwargs)
+
+        # Build a filter for writing an image
+        window_filter = vtk.vtkWindowToImageFilter()
+        window_filter.SetInput(self.__vtkwindow)
+        window_filter.Update()
+
+        # Write it
+        writer = vtk.vtkPNGWriter()
+        writer.SetWriteToMemory(1)
+        writer.SetInputConnection(window_filter.GetOutputPort())
+        writer.Write()
+
+        data = memoryview(writer.GetResult()).tobytes()
+
+        return data
+
     def __getitem__(self, index):
         """
         Operator[] access into results objects.
