@@ -11,6 +11,7 @@
 
 #include "ComputeStressBase.h"
 #include "DynamicLibraryLoader.h"
+#include "RotationTensor.h"
 
 /**
  * Coupling material to use Abaqus UMAT models in MOOSE
@@ -243,6 +244,14 @@ protected:
 
   /// parameter to assist with the transition to 1-based indexing
   const bool _use_one_based_indexing;
+
+  // Rotation of the material model
+  RotationTensor _R;
+
+  // keep track of total rotation
+  MaterialProperty<RankTwoTensor> & _total_rotation;
+  const MaterialProperty<RankTwoTensor> & _total_rotation_old;
+  const bool _orientation_flag;
 
 private:
   enum class DecompMethod
