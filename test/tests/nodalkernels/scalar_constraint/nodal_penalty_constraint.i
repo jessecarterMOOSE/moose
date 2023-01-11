@@ -19,55 +19,55 @@
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = 'x*x+y*y'
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     value = -4
-  [../]
+  []
 
-  [./bottom_bc_fn]
+  [bottom_bc_fn]
     type = ParsedFunction
     value = -2*y
-  [../]
+  []
 
-  [./right_bc_fn]
+  [right_bc_fn]
     type = ParsedFunction
-    value =  2*x
-  [../]
+    value = 2*x
+  []
 
-  [./top_bc_fn]
+  [top_bc_fn]
     type = ParsedFunction
-    value =  2*y
-  [../]
+    value = 2*y
+  []
 
-  [./left_bc_fn]
+  [left_bc_fn]
     type = ParsedFunction
     value = -2*x
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = SECOND
     initial_condition = 1.0
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./ffnk]
+  []
+  [ffnk]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 []
 
 [NodalKernels]
@@ -75,65 +75,65 @@
     type = NodalPPSCoefForce
     variable = u
     postprocessor = nodal_min
-    coef = 1e3  # penalty
+    coef = 1e3 # penalty
     boundary = center
   []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = FunctionNeumannBC
     variable = u
     boundary = 'bottom'
     function = bottom_bc_fn
-  [../]
-  [./right]
+  []
+  [right]
     type = FunctionNeumannBC
     variable = u
     boundary = 'right'
     function = right_bc_fn
-  [../]
-  [./top]
+  []
+  [top]
     type = FunctionNeumannBC
     variable = u
     boundary = 'top'
     function = top_bc_fn
-  [../]
-  [./left]
+  []
+  [left]
     type = FunctionNeumannBC
     variable = u
     boundary = 'left'
     function = left_bc_fn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./integral]
+  [integral]
     type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = 'initial linear'
-  [../]
-  [./nodal_min]
+  []
+  [nodal_min]
     type = NodalExtremeValue
     value_type = min
     variable = u
     boundary = center
     execute_on = 'initial linear'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 1e-9
-  l_tol = 1.e-10
+  nl_rel_tol = 1e-12
+  l_tol = 1.e-5
   nl_max_its = 10
   # This is a linear problem, so we don't need to recompute the
   # Jacobian. This isn't a big deal for a Steady problems, however, as

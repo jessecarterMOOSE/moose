@@ -19,48 +19,48 @@
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = 'x*x+y*y'
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     value = -4
-  [../]
+  []
 
-  [./bottom_bc_fn]
+  [bottom_bc_fn]
     type = ParsedFunction
     value = -2*y
-  [../]
+  []
 
-  [./right_bc_fn]
+  [right_bc_fn]
     type = ParsedFunction
-    value =  2*x
-  [../]
+    value = 2*x
+  []
 
-  [./top_bc_fn]
+  [top_bc_fn]
     type = ParsedFunction
-    value =  2*y
-  [../]
+    value = 2*y
+  []
 
-  [./left_bc_fn]
+  [left_bc_fn]
     type = ParsedFunction
     value = -2*x
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = SECOND
     initial_condition = 1.0
-  [../]
+  []
 
-  [./lambda]
+  [lambda]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -80,16 +80,16 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ffnk]
+  [ffnk]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 []
 
 [NodalKernels]
@@ -103,62 +103,62 @@
 []
 
 [ScalarKernels]
-  [./constraint]
+  [constraint]
     type = AverageValueConstraint
     variable = lambda
     pp_name = nodal_min
     value = 0.0
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = FunctionNeumannBC
     variable = u
     boundary = 'bottom'
     function = bottom_bc_fn
-  [../]
-  [./right]
+  []
+  [right]
     type = FunctionNeumannBC
     variable = u
     boundary = 'right'
     function = right_bc_fn
-  [../]
-  [./top]
+  []
+  [top]
     type = FunctionNeumannBC
     variable = u
     boundary = 'top'
     function = top_bc_fn
-  [../]
-  [./left]
+  []
+  [left]
     type = FunctionNeumannBC
     variable = u
     boundary = 'left'
     function = left_bc_fn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./integral]
+  [integral]
     type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = 'initial linear'
-  [../]
-  [./nodal_min]
+  []
+  [nodal_min]
     type = NodalExtremeValue
     value_type = min
     variable = u
     boundary = center
     execute_on = 'initial linear'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]
