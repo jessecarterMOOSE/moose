@@ -44,7 +44,7 @@
 
 [VectorPostprocessors]
   [vpp]
-    type = ElementMaterialSampler
+    type = ElementMaterialRealSampler
     material = 'mat'
     elem_ids = '3 4 7 42 88'
   []

@@ -83,7 +83,7 @@
 
 [VectorPostprocessors]
   [props]
-    type = ElementMaterialSampler
+    type = ElementMaterialRealSampler
     property = 'prop1 prop2 propt propx'
     execute_on = 'initial timestep_end'
   []

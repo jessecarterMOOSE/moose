@@ -12,23 +12,19 @@
 #include "ElementVectorPostprocessor.h"
 #include <optional>
 
-/// This postprocessor records all scalar material properties of the specified
-/// material object on specified elements at the indicated execution points
-/// (e.g. initial, timestep_begin, etc.).  Non-scalar properties are ignored
-/// with a warning.
-class ElementMaterialSampler : public ElementVectorPostprocessor
+class ElementMaterialSamplerBase : public ElementVectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  ElementMaterialSampler(const InputParameters & parameters);
+  ElementMaterialSamplerBase(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
   virtual void threadJoin(const UserObject & y) override;
 
-private:
+protected:
   /// Sorts all data in the VectorPostProcessorValue objects so that output
   /// from this postprocessor is ordered consistently across arbitrary number
   /// of parallel jobs.
@@ -48,14 +44,13 @@ private:
   VectorPostprocessorValue & _y_coords;
   VectorPostprocessorValue & _z_coords;
 
-  /// Columns for each (scalar) property of the material.
+  /// Columns for each property of the material.
   std::vector<VectorPostprocessorValue *> _prop_vecs;
 
   /// Reference to each material property - used to retrieve the actual
   /// property values at every execution point.
   std::vector<const PropertyValue *> _prop_refs;
 
-  /// Names for every property in the material - used for determining if
-  /// properties are scalar or not.
+  /// Names for every property in the material
   std::vector<std::string> _prop_names;
 };

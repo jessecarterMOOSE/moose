@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ElementMaterialSampler.h"
+#include "ElementMaterialSamplerBase.h"
 #include "Material.h"
 #include "IndirectSort.h"
 #include "MooseMesh.h"
@@ -16,19 +16,10 @@
 
 #include <numeric>
 
-registerMooseObject("MooseApp", ElementMaterialSampler);
-registerMooseObjectRenamed("MooseApp",
-                           MaterialVectorPostprocessor,
-                           "06/30/2025 24:00",
-                           ElementMaterialSampler);
-
 InputParameters
-ElementMaterialSampler::validParams()
+ElementMaterialSamplerBase::validParams()
 {
   InputParameters params = ElementVectorPostprocessor::validParams();
-  params.addClassDescription("Records all Real-valued material properties of a material object, "
-                             "or Real-valued material properties of the supplied property names "
-                             "on quadrature points on elements at the indicated execution points.");
   params.addParam<MaterialName>("material", "Material for which all properties will be recorded.");
   params.addParam<std::vector<MaterialPropertyName>>(
       "property", "Material property names that will be recorded.");
@@ -38,7 +29,7 @@ ElementMaterialSampler::validParams()
   return params;
 }
 
-ElementMaterialSampler::ElementMaterialSampler(const InputParameters & parameters)
+ElementMaterialSamplerBase::ElementMaterialSamplerBase(const InputParameters & parameters)
   : ElementVectorPostprocessor(parameters),
     _elem_ids(declareVector("elem_id")),
     _qp_ids(declareVector("qp_id")),
@@ -95,34 +86,18 @@ ElementMaterialSampler::ElementMaterialSampler(const InputParameters & parameter
   }
   else
   {
-
     // Properties supplied by user
     auto & props = getParam<std::vector<MaterialPropertyName>>("property");
     prop_names = std::vector<MaterialName>(props.begin(), props.end());
   }
 
-  // Check properties are valid and store references
+  // Store property names, derived classes will decide what to do with them
   for (auto & prop : prop_names)
-  {
-    if (hasMaterialProperty<Real>(prop))
-      _prop_refs.push_back(&getMaterialProperty<Real>(prop));
-    else if (hasMaterialProperty<unsigned int>(prop))
-      _prop_refs.push_back(&getMaterialProperty<unsigned int>(prop));
-    else if (hasMaterialProperty<int>(prop))
-      _prop_refs.push_back(&getMaterialProperty<int>(prop));
-    else
-    {
-      mooseWarning("property " + prop +
-                   " is of unsupported type and skipped by ElementMaterialSampler");
-      continue;
-    }
-    _prop_vecs.push_back(&declareVector(prop));
     _prop_names.push_back(prop);
-  }
 }
 
 void
-ElementMaterialSampler::initialize()
+ElementMaterialSamplerBase::initialize()
 {
   if (!containsCompleteHistory())
   {
@@ -137,7 +112,7 @@ ElementMaterialSampler::initialize()
 }
 
 void
-ElementMaterialSampler::execute()
+ElementMaterialSamplerBase::execute()
 {
   // skip execution if element not in filter, assuming filter was used
   const auto elem_id = _current_elem->id();
@@ -153,35 +128,10 @@ ElementMaterialSampler::execute()
     _y_coords.push_back(_q_point[qp](1));
     _z_coords.push_back(_q_point[qp](2));
   }
-
-  for (unsigned int i = 0; i < _prop_names.size(); i++)
-  {
-    auto prop_name = _prop_names[i];
-    auto prop = _prop_vecs[i];
-    std::vector<Real> vals;
-    if (hasMaterialProperty<Real>(prop_name))
-    {
-      auto vals = dynamic_cast<const MaterialProperty<Real> *>(_prop_refs[i]);
-      for (unsigned int qp = 0; qp < nqp; qp++)
-        prop->push_back((*vals)[qp]);
-    }
-    else if (hasMaterialProperty<unsigned int>(prop_name))
-    {
-      auto vals = dynamic_cast<const MaterialProperty<unsigned int> *>(_prop_refs[i]);
-      for (unsigned int qp = 0; qp < nqp; qp++)
-        prop->push_back((*vals)[qp]);
-    }
-    else if (hasMaterialProperty<int>(prop_name))
-    {
-      auto vals = dynamic_cast<const MaterialProperty<int> *>(_prop_refs[i]);
-      for (unsigned int qp = 0; qp < nqp; qp++)
-        prop->push_back((*vals)[qp]);
-    }
-  }
 }
 
 void
-ElementMaterialSampler::finalize()
+ElementMaterialSamplerBase::finalize()
 {
   // collect all processor data
   comm().gather(0, _elem_ids);
@@ -195,9 +145,9 @@ ElementMaterialSampler::finalize()
 }
 
 void
-ElementMaterialSampler::threadJoin(const UserObject & y)
+ElementMaterialSamplerBase::threadJoin(const UserObject & y)
 {
-  const auto & vpp = static_cast<const ElementMaterialSampler &>(y);
+  const auto & vpp = static_cast<const ElementMaterialSamplerBase &>(y);
   _elem_ids.insert(_elem_ids.end(), vpp._elem_ids.begin(), vpp._elem_ids.end());
   _qp_ids.insert(_qp_ids.end(), vpp._qp_ids.begin(), vpp._qp_ids.end());
   _x_coords.insert(_x_coords.end(), vpp._x_coords.begin(), vpp._x_coords.end());
@@ -214,7 +164,7 @@ ElementMaterialSampler::threadJoin(const UserObject & y)
 }
 
 void
-ElementMaterialSampler::sortVecs()
+ElementMaterialSamplerBase::sortVecs()
 {
   std::vector<size_t> ind;
   ind.resize(_elem_ids.size());

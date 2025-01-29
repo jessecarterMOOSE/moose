@@ -52,7 +52,7 @@
 
 [VectorPostprocessors]
   [vpp]
-    type = ElementMaterialSampler
+    type = ElementMaterialRealSampler
     material = 'mat'
     block = '1'
   []
